@@ -1,214 +1,182 @@
-🏗 Real Estate Document Intelligence System
-📌 Overview
+# 🏗 Real Estate Document Intelligence System
 
-This project implements a working prototype of a Real Estate Document Intelligence System that allows users to:
+## 📌 Overview
 
-Upload real estate PDFs
+This project implements a working prototype of a **Real Estate Document Intelligence System** that allows users to:
 
-Convert documents into searchable embeddings
-
-Query documents using natural language
-
-Retrieve relevant text snippets with metadata (PDF name + page number)
-
-Measure system performance and retrieval quality
+- **Upload** real estate PDFs
+- **Convert** documents into searchable embeddings
+- **Query** documents using natural language
+- **Retrieve** relevant text snippets with metadata (PDF name + page number)
+- **Measure** system performance and retrieval quality
 
 The system is designed with:
 
-Latency awareness
+- **Latency awareness**
+- **Scalability considerations**
+- **Retrieval accuracy optimization**
+- **Production-readiness thinking**
 
-Scalability considerations
+---
 
-Retrieval accuracy optimization
+## 🧠 System Architecture
 
-Production-readiness thinking
-
-🧠 System Architecture
+```
 User → FastAPI → Embedder → FAISS → Reranker → Response
                ↑
         Upload → Extract → Chunk → Embed → Index
+```
 
-Core Components
-Component	Technology
-PDF Extraction	PyMuPDF
-Embeddings	sentence-transformers (all-MiniLM-L6-v2)
-Vector Index	FAISS (IndexFlatIP)
-Reranking	CrossEncoder (ms-marco-MiniLM-L-6-v2)
-Backend	FastAPI
-Evaluation	Custom evaluation scripts
-🔄 End-to-End Workflow
-1️⃣ PDF Upload
+### Core Components
 
-User uploads a PDF via /upload
+| Component | Technology |
+|-----------|------------|
+| PDF Extraction | PyMuPDF |
+| Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
+| Vector Index | FAISS (IndexFlatIP) |
+| Reranking | CrossEncoder (ms-marco-MiniLM-L-6-v2) |
+| Backend | FastAPI |
+| Evaluation | Custom evaluation scripts |
 
-Text extracted using PyMuPDF
+---
 
-Clean paragraph-based chunking applied
+## 🔄 End-to-End Workflow
 
-Each chunk stored with:
+### 1️⃣ PDF Upload
 
-pdf_name
+- User uploads a PDF via **`/upload`**
+- Text extracted using **PyMuPDF**
+- Clean paragraph-based chunking applied
+- Each chunk stored with:
+  - `pdf_name`
+  - `page_number`
+  - `chunk_id`
 
-page_number
+### 2️⃣ Embedding Generation
 
-chunk_id
+- Each chunk converted into a **384-dimensional** embedding
+- Vectors **normalized** for cosine similarity
+- Stored inside **FAISS index** for fast retrieval
 
-2️⃣ Embedding Generation
+### 3️⃣ Query Flow
 
-Each chunk converted into a 384-dimensional embedding
+When a query is sent to **`/query`**:
 
-Vectors normalized for cosine similarity
+**Step 1 — Vector Retrieval**
 
-Stored inside FAISS index for fast retrieval
+- Query converted into embedding
+- FAISS retrieves **Top-K** similar chunks
 
-3️⃣ Query Flow
+**Step 2 — Cross-Encoder Reranking**
 
-When a query is sent to /query:
+- Query + chunk pairs scored semantically
+- **Top 3** reranked results returned
+- Each result includes:
+  - PDF name
+  - Page number
+  - Snippet text
 
-Step 1 — Vector Retrieval
+---
 
-Query converted into embedding
+## ⚡ Performance Metrics
 
-FAISS retrieves Top-K similar chunks
+Measured using **20 real estate queries** stored in:
 
-Step 2 — Cross-Encoder Reranking
+- `evaluation/test_questions.json`
 
-Query + chunk pairs scored semantically
+### 📊 Latency Results (20 Queries)
 
-Top 3 reranked results returned
+| Metric | Value |
+|--------|--------|
+| **Total Queries** | 20 |
+| **Average Latency** | **0.2692 seconds** |
+| **P95 Latency** | **0.5133 seconds** |
 
-Each result includes:
+✅ **Requirement:** < 2 seconds  
+✔ **Achieved comfortably**
 
-PDF name
+---
 
-Page number
+## 🎯 Retrieval Quality Evaluation
 
-Snippet text
+A manually curated evaluation set of **20 real estate questions** was used.
 
-⚡ Performance Metrics
+**Evaluation script:** `evaluation/evaluate.py`
 
-Measured using 20 real estate queries stored in:
+**Metrics computed:**
 
-evaluation/test_questions.json
+- Top-1 Accuracy
+- Top-3 Accuracy
+- Average Latency
+- P95 Latency
 
-📊 Latency Results (20 Queries)
+### 📈 Results
 
-Total Queries: 20
-
-Average Latency: 0.2692 seconds
-P95 Latency: 0.5133 seconds
-
-✅ Requirement: < 2 seconds
-✔ Achieved comfortably
-
-🎯 Retrieval Quality Evaluation
-
-A manually curated evaluation set of 20 real estate questions was used.
-
-Evaluation script:
-
-evaluation/evaluate.py
-
-
-Metrics computed:
-
-Top-1 Accuracy
-
-Top-3 Accuracy
-
-Average Latency
-
-P95 Latency
-
-📈 Results
-
-Total Questions: 20
-
-Top-1 Accuracy: 65%
-Top-3 Accuracy: 85%
+| Metric | Value |
+|--------|--------|
+| **Total Questions** | 20 |
+| **Top-1 Accuracy** | **65%** |
+| **Top-3 Accuracy** | **85%** |
 
 Reranking significantly improves retrieval precision compared to pure vector search.
 
-📈 System Behavior & Scalability Analysis
-What Happens as PDFs Grow Larger?
+---
 
-More pages → more chunks
+## 📈 System Behavior & Scalability Analysis
 
-More chunks → larger FAISS index
+### What Happens as PDFs Grow Larger?
 
-Larger index → slower search
+- **More pages** → more chunks
+- **More chunks** → larger FAISS index
+- **Larger index** → slower search
 
-Current FAISS type:
+**Current FAISS type:** `IndexFlatIP` (exact similarity search)  
+- **Time complexity:** O(N)
 
-IndexFlatIP (exact similarity search)
-Time complexity: O(N)
+**Suitable for:**
 
+- Prototype scale
+- ~10K chunks
+- Single-node deployment
 
-Suitable for:
+### What Would Break First in Production?
 
-Prototype scale
+1. **RAM Usage** — FAISS stores embeddings in memory. Memory grows linearly.
+2. **Cross-Encoder Latency** — Reranking model is transformer-based and CPU-intensive.
+3. **Synchronous Upload** — Large PDFs may block request thread during ingestion.
 
-~10K chunks
+### Bottlenecks
 
-Single-node deployment
+| Area | Limitation |
+|------|------------|
+| FAISS Flat Index | Linear search |
+| Reranker | CPU-heavy |
+| JSON Metadata | Not scalable |
+| No Caching | Repeated queries recomputed |
 
-What Would Break First in Production?
+### How to Scale Further
 
-1️⃣ RAM Usage
-FAISS stores embeddings in memory. Memory grows linearly.
+- Use **FAISS IVF or HNSW** (sublinear search)
+- Move metadata to **SQL/NoSQL database**
+- Add **Redis caching**
+- Use **async ingestion pipeline**
+- Deploy **multiple API workers**
 
-2️⃣ Cross-Encoder Latency
-Reranking model is transformer-based and CPU-intensive.
+---
 
-3️⃣ Synchronous Upload
-Large PDFs may block request thread during ingestion.
+## 🏆 Design Decisions & Justifications
 
-Bottlenecks
-Area	Limitation
-FAISS Flat Index	Linear search
-Reranker	CPU-heavy
-JSON Metadata	Not scalable
-No Caching	Repeated queries recomputed
-How to Scale Further
+| Decision | Justification |
+|----------|---------------|
+| **Why FAISS Flat Index?** | Exact similarity search, deterministic behavior, easier debugging, appropriate for prototype scale. |
+| **Why Reranking?** | Improves semantic matching; boosted Top-3 accuracy significantly. |
+| **Why FastAPI?** | Lightweight, async-ready, built-in OpenAPI documentation, clean API interface for testing. |
 
-Use FAISS IVF or HNSW (sublinear search)
+---
 
-Move metadata to SQL/NoSQL database
+## 📂 Project Structure
 
-Add Redis caching
-
-Use async ingestion pipeline
-
-Deploy multiple API workers
-
-🏆 Design Decisions & Justifications
-Why FAISS Flat Index?
-
-Exact similarity search
-
-Deterministic behavior
-
-Easier debugging
-
-Appropriate for prototype scale
-
-Why Reranking?
-
-Improves semantic matching
-
-Boosted Top-3 accuracy significantly
-
-Why FastAPI?
-
-Lightweight
-
-Async-ready
-
-Built-in OpenAPI documentation
-
-Clean API interface for testing
-
-📂 Project Structure
+```
 real_estate_doc_ai/
 │
 ├── api/
@@ -229,21 +197,21 @@ real_estate_doc_ai/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
+```
 
-📄 PDFs Used for Evaluation
+---
+
+## 📄 PDFs Used for Evaluation
 
 The system was tested using the following real estate brochures:
 
-Max Towers Brochure
-Source: https://maxestates.in/downloads
-
-222 Rajpur Brochure
-Source: https://maxestates.in/downloads
+| Document | Source |
+|----------|--------|
+| **Max Towers Brochure** | https://maxestates.in/downloads |
+| **222 Rajpur Brochure** | https://maxestates.in/downloads |
 
 These PDFs were used to:
 
-Validate retrieval performance
-
-Measure latency
-
-Compute Top-1 and Top-3 accuracy
+- Validate retrieval performance
+- Measure latency
+- Compute Top-1 and Top-3 accuracy
