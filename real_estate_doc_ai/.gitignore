@@ -1,47 +1,7 @@
-# ==============================
-# Python
-# ==============================
+ingestion/chunks.json
+ingestion/extracted_pages.json
+embeddings/
+index/
+data/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-
-# Virtual Environment
-venv/
-env/
-.venv/
-
-# ==============================
-# IDE / Editor
-# ==============================
-.vscode/
-.idea/
-
-# ==============================
-# OS files
-# ==============================
-.DS_Store
-Thumbs.db
-
-# ==============================
-# Generated Embeddings / Index
-# ==============================
-embeddings/
-index/faiss_index.index
-
-# ==============================
-# Uploaded PDFs (optional)
-# ==============================
-data/
-
-# ==============================
-# Logs
-# ==============================
-*.log
-
-# ==============================
-# Jupyter (if used)
-# ==============================
-.ipynb_checkpoints/
