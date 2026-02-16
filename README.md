@@ -251,57 +251,6 @@ Reranking significantly improves retrieval precision compared to pure vector sea
 
 ## 🎥 Demo Video
 
-### 🎬 System Demonstration
-
-A short screen recording demonstrates the complete working system.
-
-The video shows:
-
-**Uploading a real estate PDF**
-
-- Using the **`/upload`** endpoint
-- PDF is extracted, chunked, embedded, and indexed
-- System confirms number of chunks added
-
-**Querying the system**
-
-- Natural language question sent via **`/query`**
-- Response includes:
-  - Retrieved snippet
-  - PDF name
-  - Page number
-  - Query latency
-
-**Performance Evaluation**
-
-- Running **`evaluation/latency_test.py`**
-- Displays:
-  - Average Latency
-  - P95 Latency
-
-**Retrieval Evaluation**
-
-- Running **`evaluation/evaluate.py`**
-- Displays:
-  - Top-1 Accuracy
-  - Top-3 Accuracy
-  - Latency statistics
-
-### 📌 This demonstrates:
-
-- End-to-end functionality
-- Measured performance
-- Retrieval quality
-- Engineering awareness
-
-### 📹 Demo Link
-
-(Add your video link here)
-
-*Example:*  
-**Demo Video:**
-## 🎥 Demo Video
-
 [![Watch Demo](demo_thumbnail.png)](https://github.com/user-attachments/assets/49461576-16bf-47f7-ad77-cf635790c1ef)
 
 [![Watch Demo](demo_thumbnail.png)](https://github.com/user-attachments/assets/a0ce9f4b-e1ab-4c7c-8cbc-f379c0de7297)
