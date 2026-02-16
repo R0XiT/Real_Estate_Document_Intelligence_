@@ -39,6 +39,81 @@ User → FastAPI → Embedder → FAISS → Reranker → Response
 | Evaluation | Custom evaluation scripts |
 
 ---
+## ⚙️ Setup
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/your-username/real_estate_doc_ai.git
+cd real_estate_doc_ai
+```
+
+### 2. Create Virtual Environment
+
+```bash
+python -m venv venv
+venv\Scripts\activate  # Windows
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+pip install python-multipart
+```
+
+### 4. Run the API
+
+```bash
+uvicorn api.app:app --reload
+```
+
+**Open:**
+
+http://127.0.0.1:8000/docs
+
+---
+
+## 🚀 Usage
+
+### Upload PDF
+
+**POST** `/upload`
+
+Upload a PDF via Swagger UI.
+
+**Example response:**
+
+```json
+{
+  "message": "file uploaded and indexed successfully",
+  "chunks_added": 129,
+  "total_vectors": 129
+}
+```
+
+### Query System
+
+**POST** `/query`
+
+**Request:**
+
+```json
+{
+  "question": "What parking facilities are available?"
+}
+```
+
+**Response includes:**
+
+- PDF name
+- Page number
+- Relevance score
+- Snippet
+- Query latency
+
+---
+
 
 ## 🔄 End-to-End Workflow
 
@@ -89,8 +164,8 @@ Measured using **20 real estate queries** stored in:
 | Metric | Value |
 |--------|--------|
 | **Total Queries** | 20 |
-| **Average Latency** | **0.2692 seconds** |
-| **P95 Latency** | **0.5133 seconds** |
+| **Average Latency** | **0.2458 seconds** |
+| **P95 Latency** | **0.4866 seconds** |
 
 ✅ **Requirement:** < 2 seconds  
 ✔ **Achieved comfortably**
@@ -224,7 +299,13 @@ The video shows:
 (Add your video link here)
 
 *Example:*  
-**Demo Video:** [https://drive.google.com/your-link-here](https://github.com/user-attachments/assets/2ceb4385-7f7b-4bf4-a6c9-b4407659d09f)
+**Demo Video:**
+## 🎥 Demo Video
+
+[![Watch Demo](demo_thumbnail.png)](https://github.com/user-attachments/assets/49461576-16bf-47f7-ad77-cf635790c1ef)
+
+[![Watch Demo](demo_thumbnail.png)](https://github.com/user-attachments/assets/a0ce9f4b-e1ab-4c7c-8cbc-f379c0de7297)
+
 
 ---
 
