@@ -224,7 +224,7 @@ The video shows:
 (Add your video link here)
 
 *Example:*  
-**Demo Video:** https://drive.google.com/your-link-here
+**Demo Video:** [https://drive.google.com/your-link-here](https://github.com/user-attachments/assets/2ceb4385-7f7b-4bf4-a6c9-b4407659d09f)
 
 ---
 
