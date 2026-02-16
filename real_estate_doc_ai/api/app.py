@@ -6,9 +6,12 @@ import json
 import time
 import os
 import uuid
-import fitz  
+import fitz
 from sentence_transformers import SentenceTransformer, CrossEncoder
 
+# ----------------------------
+# Configuration
+# ----------------------------
 
 EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
@@ -16,28 +19,47 @@ TOP_K = 10
 
 CHUNK_SIZE = 256
 OVERLAP = 50
+MIN_TOKENS = 20  # unified threshold
 
 DATA_FOLDER = "data"
 INDEX_PATH = "index/faiss_index.index"
 METADATA_PATH = "embeddings/metadata.json"
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
+os.makedirs("index", exist_ok=True)
+os.makedirs("embeddings", exist_ok=True)
 
 app = FastAPI(title="Real Estate Document Intelligence API")
 
-print("Loading models and index...")
-
+print("Loading models...")
 
 embedder = SentenceTransformer(EMBED_MODEL)
 reranker = CrossEncoder(RERANK_MODEL)
-index = faiss.read_index(INDEX_PATH)
 
-with open(METADATA_PATH, "r", encoding="utf-8") as f:
-    metadata = json.load(f)
+embedding_dim = embedder.get_sentence_embedding_dimension()
+
+# ----------------------------
+# Safe Index Initialization
+# ----------------------------
+
+if os.path.exists(INDEX_PATH):
+    print("Loading existing FAISS index...")
+    index = faiss.read_index(INDEX_PATH)
+else:
+    print("Creating new FAISS index...")
+    index = faiss.IndexFlatIP(embedding_dim)
+
+if os.path.exists(METADATA_PATH):
+    with open(METADATA_PATH, "r", encoding="utf-8") as f:
+        metadata = json.load(f)
+else:
+    metadata = []
 
 print("System Ready.")
 
-
+# ----------------------------
+# Chunking
+# ----------------------------
 
 def chunk_text(text, tokenizer):
     tokens = tokenizer.encode(text, add_special_tokens=False)
@@ -46,7 +68,7 @@ def chunk_text(text, tokenizer):
     for i in range(0, len(tokens), CHUNK_SIZE - OVERLAP):
         chunk_tokens = tokens[i:i + CHUNK_SIZE]
 
-        if len(chunk_tokens) < 20:
+        if len(chunk_tokens) < MIN_TOKENS:
             continue
 
         chunk_text = tokenizer.decode(chunk_tokens)
@@ -54,23 +76,33 @@ def chunk_text(text, tokenizer):
 
     return chunks
 
-
+# ----------------------------
+# Root Endpoint
+# ----------------------------
 
 @app.get("/")
 def root():
     return {"message": "Real Estate Document Intelligence API is running."}
 
+# ----------------------------
+# Query Schema
+# ----------------------------
 
 class QueryRequest(BaseModel):
     question: str
 
+# ----------------------------
+# Query Endpoint
+# ----------------------------
 
 @app.post("/query")
 def query_documents(request: QueryRequest):
     start_time = time.time()
     question = request.question
 
-    
+    if index.ntotal == 0:
+        return {"message": "No documents indexed yet."}
+
     query_embedding = embedder.encode([question], convert_to_numpy=True)
     faiss.normalize_L2(query_embedding)
 
@@ -80,7 +112,6 @@ def query_documents(request: QueryRequest):
     candidate_pages = [metadata[idx]["page_number"] for idx in indices[0]]
     candidate_pdfs = [metadata[idx]["pdf_name"] for idx in indices[0]]
 
-    
     pairs = [[question, chunk] for chunk in candidate_chunks]
     rerank_scores = reranker.predict(pairs)
 
@@ -107,7 +138,9 @@ def query_documents(request: QueryRequest):
         "results": results
     }
 
-
+# ----------------------------
+# Upload Endpoint
+# ----------------------------
 
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
@@ -117,12 +150,10 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     file_path = os.path.join(DATA_FOLDER, file.filename)
 
-    
     with open(file_path, "wb") as f:
         content = await file.read()
         f.write(content)
 
-    
     doc = fitz.open(file_path)
     new_chunks = []
 
@@ -146,15 +177,11 @@ async def upload_pdf(file: UploadFile = File(...)):
     if not new_chunks:
         return {"message": "No extractable text found."}
 
-   
     texts = [chunk["text"] for chunk in new_chunks]
     embeddings = embedder.encode(texts, convert_to_numpy=True)
     faiss.normalize_L2(embeddings)
 
-   
     index.add(embeddings)
-
-  
     metadata.extend(new_chunks)
 
     faiss.write_index(index, INDEX_PATH)
