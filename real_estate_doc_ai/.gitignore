@@ -1,5 +1,17 @@
+# Ignore runtime data
 data/
 index/faiss_index.index
 embeddings/metadata.json
-venv/
+
+# Ignore generated ingestion files
+ingestion/chunks.json
+ingestion/extracted_pages.json
+embeddings/
+
+# Ignore Python cache
 __pycache__/
+*.pyc
+
+# Ignore virtual environment
+venv/
+# Ignore logs
