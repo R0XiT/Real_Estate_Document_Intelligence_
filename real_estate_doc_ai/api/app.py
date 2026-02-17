@@ -17,9 +17,9 @@ EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 TOP_K = 10
 
-CHUNK_SIZE = 256
-OVERLAP = 50
-MIN_TOKENS = 20  # unified threshold
+CHUNK_CHAR_LENGTH = 1000
+CHUNK_OVERLAP = 200
+MIN_CHAR_LENGTH = 100
 
 DATA_FOLDER = "data"
 INDEX_PATH = "index/faiss_index.index"
@@ -39,7 +39,7 @@ reranker = CrossEncoder(RERANK_MODEL)
 embedding_dim = embedder.get_sentence_embedding_dimension()
 
 # ----------------------------
-# Safe Index Initialization
+# Safe FAISS Initialization
 # ----------------------------
 
 if os.path.exists(INDEX_PATH):
@@ -58,21 +58,22 @@ else:
 print("System Ready.")
 
 # ----------------------------
-# Chunking
+# Character-Based Chunking
 # ----------------------------
 
-def chunk_text(text, tokenizer):
-    tokens = tokenizer.encode(text, add_special_tokens=False)
+def chunk_text(text):
     chunks = []
+    start = 0
+    text_length = len(text)
 
-    for i in range(0, len(tokens), CHUNK_SIZE - OVERLAP):
-        chunk_tokens = tokens[i:i + CHUNK_SIZE]
+    while start < text_length:
+        end = start + CHUNK_CHAR_LENGTH
+        chunk = text[start:end]
 
-        if len(chunk_tokens) < MIN_TOKENS:
-            continue
+        if len(chunk.strip()) >= MIN_CHAR_LENGTH:
+            chunks.append(chunk.strip())
 
-        chunk_text = tokenizer.decode(chunk_tokens)
-        chunks.append(chunk_text)
+        start += CHUNK_CHAR_LENGTH - CHUNK_OVERLAP
 
     return chunks
 
@@ -101,17 +102,20 @@ def query_documents(request: QueryRequest):
     question = request.question
 
     if index.ntotal == 0:
-        return {"message": "No documents indexed yet."}
+        return {"message": "No documents indexed yet. Please upload a PDF first."}
 
+    # Encode query
     query_embedding = embedder.encode([question], convert_to_numpy=True)
     faiss.normalize_L2(query_embedding)
 
+    # Retrieve candidates
     scores, indices = index.search(query_embedding, TOP_K)
 
     candidate_chunks = [metadata[idx]["text"] for idx in indices[0]]
     candidate_pages = [metadata[idx]["page_number"] for idx in indices[0]]
     candidate_pdfs = [metadata[idx]["pdf_name"] for idx in indices[0]]
 
+    # Rerank
     pairs = [[question, chunk] for chunk in candidate_chunks]
     rerank_scores = reranker.predict(pairs)
 
@@ -150,6 +154,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     file_path = os.path.join(DATA_FOLDER, file.filename)
 
+    # Save file locally
     with open(file_path, "wb") as f:
         content = await file.read()
         f.write(content)
@@ -164,7 +169,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         if not text:
             continue
 
-        chunks = chunk_text(text, embedder.tokenizer)
+        chunks = chunk_text(text)
 
         for chunk in chunks:
             new_chunks.append({
@@ -177,13 +182,16 @@ async def upload_pdf(file: UploadFile = File(...)):
     if not new_chunks:
         return {"message": "No extractable text found."}
 
+    # Generate embeddings
     texts = [chunk["text"] for chunk in new_chunks]
     embeddings = embedder.encode(texts, convert_to_numpy=True)
     faiss.normalize_L2(embeddings)
 
+    # Add to index
     index.add(embeddings)
     metadata.extend(new_chunks)
 
+    # Persist
     faiss.write_index(index, INDEX_PATH)
 
     with open(METADATA_PATH, "w", encoding="utf-8") as f:
