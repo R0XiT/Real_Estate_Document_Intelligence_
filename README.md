@@ -44,15 +44,16 @@ User → FastAPI → Embedder → FAISS → Reranker → Response
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/your-username/real_estate_doc_ai.git
+git clone <repo-link>
 cd real_estate_doc_ai
+
 ```
 
 ### 2. Create Virtual Environment
 
 ```bash
 python -m venv venv
-venv\Scripts\activate  # Windows
+venv\Scripts\activate # Windows
 ```
 
 ### 3. Install Dependencies
@@ -60,12 +61,14 @@ venv\Scripts\activate  # Windows
 ```bash
 pip install -r requirements.txt
 pip install python-multipart
+
 ```
 
 ### 4. Run the API
 
 ```bash
 uvicorn api.app:app --reload
+
 ```
 
 **Open:**
@@ -102,6 +105,18 @@ Upload a PDF via Swagger UI.
 {
   "question": "What parking facilities are available?"
 }
+```
+
+##Performance Testing
+
+**Latency:**
+```bash
+python evaluation/latency_test.py
+```
+
+**Retrieval Quality:**
+```bash
+python evaluation/evaluate.py
 ```
 
 **Response includes:**
