@@ -1,82 +1,82 @@
 [
   {
-    "question": "Where is 222 Rajpur located?",
-    "relevant_pages": [3, 6]
-  },
-  {
-    "question": "How many residences are offered?",
-    "relevant_pages": [6]
-  },
-  {
-    "question": "What amenities are available?",
-    "relevant_pages": [4]
-  },
-  {
-    "question": "Is basement parking available?",
-    "relevant_pages": [8]
-  },
-  {
-    "question": "What sustainability features exist?",
-    "relevant_pages": [13]
-  },
-  {
     "question": "Where is Max Towers located?",
     "relevant_pages": [8, 33]
   },
   {
-    "question": "How many floors does Max Towers have?",
+    "question": "What is the total super built-up area of Max Towers?",
     "relevant_pages": [7, 8]
   },
   {
-    "question": "What is the green rating?",
-    "relevant_pages": [8]
+    "question": "How many office floors does Max Towers have?",
+    "relevant_pages": [7, 8]
   },
   {
-    "question": "What office floor plate size is mentioned?",
-    "relevant_pages": [8]
+    "question": "What is the typical office floor plate size?",
+    "relevant_pages": [7, 8]
   },
   {
-    "question": "What security features are provided?",
+    "question": "What is the green rating of Max Towers?",
+    "relevant_pages": [8, 13]
+  },
+  {
+    "question": "Is Max Towers LEED certified?",
+    "relevant_pages": [13]
+  },
+  {
+    "question": "What HVAC system design parameters are used?",
+    "relevant_pages": [7]
+  },
+  {
+    "question": "How many basement parking levels are provided?",
+    "relevant_pages": [7, 8]
+  },
+  {
+    "question": "What is the ceiling height of tenant floors?",
+    "relevant_pages": [7, 18]
+  },
+  {
+    "question": "What sustainability features are included?",
+    "relevant_pages": [13]
+  },
+  {
+    "question": "What security systems are installed in the building?",
     "relevant_pages": [31]
   },
   {
-    "question": "Are visitor management systems available?",
-    "relevant_pages": [31]
+    "question": "What kind of elevators are provided?",
+    "relevant_pages": [32]
   },
   {
-    "question": "Is metro access available?",
+    "question": "What power backup facilities are available?",
+    "relevant_pages": [32]
+  },
+  {
+    "question": "What water storage facilities are available?",
+    "relevant_pages": [32]
+  },
+  {
+    "question": "What wellness facilities are available in Max Towers?",
+    "relevant_pages": [21]
+  },
+  {
+    "question": "Is there a swimming pool in Max Towers?",
+    "relevant_pages": [21]
+  },
+  {
+    "question": "Is there a co-working space available?",
+    "relevant_pages": [26]
+  },
+  {
+    "question": "What amenities are available in the entrance lobby?",
+    "relevant_pages": [16]
+  },
+  {
+    "question": "Is metro access available near Max Towers?",
     "relevant_pages": [8, 33]
   },
   {
-    "question": "How many car parking spaces are provided?",
-    "relevant_pages": [8]
-  },
-  {
-    "question": "What nearby landmarks are mentioned?",
-    "relevant_pages": [33]
-  },
-  {
-    "question": "What HVAC system is used?",
-    "relevant_pages": [7]
-  },
-  {
-    "question": "What power backup is available?",
-    "relevant_pages": [7, 32]
-  },
-  {
-    "question": "What makes the property premium?",
-    "relevant_pages": [3, 6]
-  },
-  {
-    "question": "What electrical features are included?",
-    "relevant_pages": [7]
-  },
-  {
-    "question": "What internet services are provided?",
-    "relevant_pages": [31]
-  },
-  {
-    "question": "What is the super built-up area?",
-    "relevant_pages": [7, 8]
+    "question": "What is the RERA registration number of Max Towers?",
+    "relevant_pages": [36]
   }
 ]
